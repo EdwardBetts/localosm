@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}API documentation - Local OpenStreetMap{% endblock %}
+
+{% macro example(params) %}
+{% set url = "https://local.openstreetmap.directory/api/1/lookup?" + params %}
+{% set url = "/api/1/lookup?" + params %}
+<a href="{{ url }}">{{ url }}</a>
+{%- endmacro %}
+
+{% block content %}
+  <h2>API</h2>
+
+  <p>The API is accessed via an HTTP GET request. Location can be specified
+  either with a search string, OSM element, or location coordinates.</p>
+
+  <p>Parameters:</p>
+
+  <ul>
+    <li><em>q</em>: search string passed to the <a href="https://nominatim.openstreetmap.org/">Nominatim API</a></li>
+    <li><em>osm_type</em> and <em>osm_id</em>: specifies an OSM element, osm_type should be one of N, W or R</li>
+    <li><em>lat</em> and <em>lon</em>: coordinates to search for</li>
+  </ul>
+
+  <p>Callers should supply a single group of parameters, either <em>q</em> OR <em>osm_type</em> &amp; <em>osm_id</em> OR <em>lat</em> &amp; <em>lon</em>.</p>
+
+  <p>The endpoint is https://local.openstreetmap.directory/api/1/lookup</p>
+
+  <p>The response is in JSON format, it includes the lookup parameters and the
+  suggested mailing list. For search string queries it also includes the
+  coordinates of the matching object.</p>
+
+  <p>If the lookup triggers an error then the response consist of the calling
+  parameters and an error message. For testing a simulated error can be
+  generated using the error parameter.</p>
+
+  <h3>Examples</h3>
+
+  <p>Query by search: {{ example('q=Rome') }}</p>
+  <p>Response:</p>
+<pre>{
+  'local_match': true,
+  'list': 'Talk-it-lazio',
+  'lat': 41.893,
+  'lon': 12.483,
+  'q': 'Rome'
+}</pre>
+
+  <p>Non-existent place: {{ example('q=Zerzura') }}</p>
+  <p>Response:</p>
+<pre>{
+  'local_match': false,
+  'list': 'talk',
+  'q': 'Zerzura'
+}</pre>
+
+  <p>Search with coordinates parameters: {{ example('lat=47.6&lon=-122.3') }}</p>
+  <p>Response:</p>
+<pre>{
+  'local_match': true,
+  'list': 'Talk-us-pugetsound',
+  'lat': 47.6,
+  'lon': -122.3
+}</pre>
+
+  <p>Search with osm parameters: {{ example('osm_type=R&osm_id=295355') }}</p>
+  <p>Response:</p>
+<pre>
+{
+  "local_match": true,
+  "list": "Talk-gb-midanglia",
+  "osm_type": "R",
+  "osm_id": 295355
+}</pre>
+
+  <p>Search with coordinates in query: {{ example('q=47.6,-122.3') }}</p>
+  <p>Response:</p>
+<pre>{
+  'local_match': true,
+  'list': 'Talk-us-pugetsound',
+  'lat': 47.6,
+  'lon': -122.3,
+  'q': '47.6,-122.3'
+}</pre>
+
+  <p>Simulated error: {{ example('q=England&error=sample+error') }}</p>
+  <p>Response:</p>
+<pre>{
+  'error': 'sample error',
+  'q': 'England'
+}</pre>
+
+{% endblock %}

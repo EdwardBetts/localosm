@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>
+    {% block title %}{% endblock %}
+  </title>
+
+  <style>
+  body { font-family: monospace; }
+  ul { list-style-type: square; }
+  </style>
+
+</style>
+{% block style %}{% endblock %}
+</head>
+
+<body>
+  <h1>OpenStreetMap local mailing list directory</h1>
+  <p>Discover local OpenStreetMap mailing lists:
+  <a href="{{ url_for('index') }}">search</a> |
+  <a href="{{ url_for('api_docs') }}">API</a> |
+  <a href="https://github.com/EdwardBetts/localosm">GitHub</a> |
+  <a href="{{ url_for('contact_page') }}">contact</a>
+  </p>
+  <hr>
+  {% block content %}{% endblock %}
+
+  {% block script %}{% endblock %}
+</body>
+</html>

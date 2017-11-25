@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Contact - Local OpenStreetMap{% endblock %}
+
+{% block content %}
+  <h2>Contact</h2>
+
+  <p>If you have a question or comment you can e-mail edward@4angle.com or send me a message via this contact form.</p>
+
+  {% if msg_sent %}
+    <p><strong>Message received.</strong></p>
+  {% else %}
+  <form method="POST">
+    <p><label for="msg">your name</label><br/>
+    <input name="name" size="60"></p>
+    <p><label for="msg">your e-mail address</label><br/>
+    <input name="email" type="email" size="60"></p>
+    <p><label for="msg">your message</label><br/>
+    <textarea name="msg" id="msg" required="" rows="12" cols="80"></textarea></p>
+    <input type="submit" value="send"/>
+  </form>
+{% endif %}
+
+{% endblock %}

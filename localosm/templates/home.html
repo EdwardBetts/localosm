@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{% if q %}{{ q + ' - ' }}{% endif %}Local OpenStreetMap{% endblock %}
+
+{% macro example(q) %}
+<a href="{{ url_for('index', q=q) }}">{{ q }}</a>
+{%- endmacro %}
+
+{% macro ml_link(ml) %}
+<a href="https://lists.openstreetmap.org/listinfo/{{ ml | lower }}">{{ ml }}</a>
+{%- endmacro %}
+
+{% block style %}
+{% if q and result %}
+<link rel="stylesheet" href="{{ url_for('static', filename='leaflet/leaflet.css') }}">
+<style>
+#map {
+  height: 30rem;
+  width: 40rem;
+  border: black 1px solid
+}
+
+@media (max-width: 575px) {
+  #map { width: 95vw; height: 70vh; }
+}
+</style>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+  <p>Search by place name or latitude and longitude.</p>
+
+<form>
+  <input name="q" value="{{ q or '' }}" size="60"> <input type="submit" value="lookup">
+</form>
+<p>Examples:
+{{ example('Cuba') }},
+{{ example('Rome') }},
+{{ example('Burkina Faso') }},
+{{ example('Oxford') }},
+{{ example('Timbuktu') }},
+{{ example('47.6,-122.3') }}
+</p>
+{% if q %}
+  <p>search for: {{ q }}
+
+  {% if q_type == 'latlon' %}
+    <a href="http://www.openstreetmap.org/#map=4/{{ lat }}/{{ lon }}">view on OSM</a></p>
+  {% elif result %}
+    </p>
+    <p>lat/lon: {{ '{:.3f},{:.3f}'.format(result.lat | float, result.lon | float) }} <a href="https://openstreetmap.org/{{ result.osm_type }}/{{ result.osm_id }}">view on OSM</a></p>
+  {% endif %}
+
+  <p>mailing list: <big><b>{{ ml_link(ml or 'talk') }}</b></big></p>
+  {% if not ml or ml == 'talk' %}
+    <p>Unable to find a local OSM list. Use the talk list.</p>
+  {% endif %}
+
+  {% if address %}
+    <ul>
+      {% for key, value in address %}
+        <li>{{ key.replace('_', ' ') }}:
+        {% if key == 'country_code' %}
+          {{ value | upper }}</li>
+        {% else %}
+          {{ value }}
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if result %}
+    <div id="map" />
+  {% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block script %}
+{% if q and result %}
+<script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
+
+<script>
+var map = L.map('map');
+
+// {{ q_type }} - {{ result.osm_type }}
+
+{% if q_type == 'name' %}
+  {% if result.osm_type == 'node' %}
+    var lat = {{ result.lat }};
+    var lon = {{ result.lon }};
+    var marker = L.marker([lat, lon]).addTo(map);
+    map.setView([lat, lon], 16);
+  {% else %}
+    var geojson = {{ result.geojson | tojson }};
+    var layer = L.geoJSON(geojson);
+    layer.addTo(map);
+    map.fitBounds(layer.getBounds());
+  {% endif %}
+{% else %}
+    var lat = {{ lat }};
+    var lon = {{ lon }};
+    var marker = L.marker([lat, lon]).addTo(map);
+    map.setView([lat, lon], 16);
+{% endif %}
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+</script>
+
+{% endif %}
+{% endblock %}
